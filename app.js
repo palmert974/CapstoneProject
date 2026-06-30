@@ -3,16 +3,18 @@
    iTunes Search API · No auth required
    ============================================= */
 
-const ITUNES = 'https://itunes.apple.com/search';
-const CORS   = 'https://corsproxy.io/?';
+const ITUNES   = 'https://itunes.apple.com/search';
+const PAGE_SIZE = 24;
 
-let currentTrack  = null;
-let allTracks     = [];
+// Simple in-memory cache: key=term → tracks array
+const _cache = new Map();
+
+let currentTrack   = null;
+let allTracks      = [];
 let filteredTracks = [];
-let currentQuery  = '';
-let currentGenre  = '';
+let currentQuery   = '';
+let currentGenre   = '';
 let displayedCount = 0;
-const PAGE_SIZE    = 24;
 
 const audio = document.getElementById('globalAudio');
 
@@ -22,12 +24,20 @@ function itunesUrl(term, limit = 50) {
 }
 
 async function fetchTracks(term, limit = 50) {
+  const key = `${term}::${limit}`;
+  if (_cache.has(key)) return _cache.get(key);
   try {
-    const res  = await fetch(itunesUrl(term, limit));
-    if (!res.ok) throw new Error('network');
+    const controller = new AbortController();
+    const timeout    = setTimeout(() => controller.abort(), 8000);
+    const res  = await fetch(itunesUrl(term, limit), { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return (data.results || []).filter(t => t.previewUrl && t.artworkUrl100);
-  } catch {
+    const tracks = (data.results || []).filter(t => t.previewUrl && t.artworkUrl100);
+    _cache.set(key, tracks);
+    return tracks;
+  } catch (err) {
+    console.warn(`[DiscoverUs] fetchTracks("${term}") failed:`, err.message);
     return [];
   }
 }
@@ -253,14 +263,25 @@ async function loadSpotlight() {
 
 /* ─── BROWSE PAGE ─── */
 async function initBrowse(genre) {
-  currentGenre = genre;
-  currentQuery = genre;
+  currentGenre   = genre;
+  currentQuery   = genre;
   displayedCount = 0;
   setResultsCount('Loading…');
+  showBrowseSkeletons();
   const term = genre || 'hip hop r&b afrobeats pop';
   allTracks = await fetchTracks(term, 100);
+  if (!allTracks.length && !genre) {
+    // Fallback: try simpler query
+    allTracks = await fetchTracks('music', 50);
+  }
   filteredTracks = allTracks;
   renderBrowseGrid();
+}
+
+function showBrowseSkeletons() {
+  const grid = document.getElementById('browseGrid');
+  if (!grid) return;
+  grid.innerHTML = Array(8).fill('<div class="skeleton-card"></div>').join('');
 }
 
 function renderBrowseGrid() {
