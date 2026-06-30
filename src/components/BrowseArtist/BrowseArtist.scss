@@ -3,109 +3,134 @@
 @import "../../styles/typography";
 
 .browse-artist {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+  padding: 1rem 1.5rem 3rem;
 
-  // background-color: $spotify-green;
-  // background: linear-gradient($spotify-green 1.61%,#121212 39.73%,var(--background-base,$sound-cloud-orange) 75.29%);
-  @include desktop {
-    margin-left: 6.25rem;
-    margin-right: 6.25rem;
-  }
-
-  .album-cover {
-    width: 100%;
-    object-fit: cover;
-    height: 300px;
+  &--loading,
+  &--error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 30vh;
+    gap: 1rem;
+    color: white;
+    font-size: 1.1rem;
   }
 }
 
-
-
-.album-cover {
-  width: 100%;
-}
-
-.song-title {
-  font-size: 2rem;
-  margin-top: 3rem;
-  margin-bottom: 1rem;
-  text-align: center;
-  color: $sound-cloud-orange;
+.retry-btn {
+  background: $spotify-green;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 2rem;
+  font-size: 1rem;
   font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.85;
+  }
 }
 
-.artist {
-  font-size: 1.5rem;
-  text-align: center;
-  color: $spotify-light-gray;
+.artist-section {
+  margin-bottom: 2.5rem;
+
+  &__title {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid $spotify-green;
+    display: inline-block;
+  }
 }
 
 .cards {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  padding-top: 18px;
-  flex-direction: row;
+  gap: 16px;
 
+  @include desktop {
+    flex-wrap: nowrap;
+    gap: 20px;
+  }
+}
 
-  .card {
-    width: 200px;
-    border-radius: 10px;
-    overflow: hidden;
-    cursor: pointer;
-    position: relative;
-    background: #1a1a1a;
+.card {
+  width: 160px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  background: #1a1a1a;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
 
-    &:hover {
-      transform: scale(1.05);
-    }
+  &:hover {
+    transform: scale(1.05);
+  }
 
-    .player {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1;
+  &--active {
+    outline: 2px solid $spotify-green;
+    outline-offset: 2px;
+  }
 
-      button {
-        background: #1db954;
-        color: #fff;
-        border: none;
-        border-radius: 50%;
-        width: 48px;
-        height: 48px;
-        font-size: 1.1rem;
-        cursor: pointer;
-        font-weight: bold;
-      }
-    }
+  .player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
 
-    img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-    }
-
-    h2 {
-      margin: 10px 0;
-      font-size: 1.5rem;
-
-    }
-
-    p {
-      margin: 0;
+    button {
+      background: $spotify-green;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
       font-size: 1.2rem;
-      color: $spotify-white;
-      transition: transform 0.2s ease-in-out;
+      cursor: pointer;
+      font-weight: bold;
     }
+  }
+
+  img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.6rem 0.75rem;
+    text-decoration: none;
+    gap: 2px;
+  }
+
+  &__artist {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $spotify-green;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__track {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

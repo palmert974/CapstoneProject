@@ -1,86 +1,149 @@
-import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./BrowseArtist.scss";
 
-const ITUNES_URL =
-  "https://itunes.apple.com/search?term=hip-hop+rnb+afrobeats&media=music&entity=song&limit=24";
+const CURATED_ARTISTS = [
+  "Rema",
+  "Burna Boy",
+  "Summer Walker",
+  "WizKid",
+  "SZA",
+  "J. Cole",
+];
+
+async function fetchArtistTracks(artist) {
+  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
+    artist
+  )}&media=music&entity=song&limit=6&country=US`;
+  const res = await axios.get(url);
+  return res.data.results
+    .filter((r) => r.previewUrl && r.artworkUrl100)
+    .slice(0, 4)
+    .map((r) => ({
+      name: r.trackName,
+      artist: r.artistName,
+      image: r.artworkUrl100.replace("100x100", "300x300"),
+      preview: r.previewUrl,
+      id: r.artistId,
+    }));
+}
 
 function BrowseArtist() {
-  const [tracks, setTracks] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [artistSections, setArtistSections] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState(-1);
+  const [hoveredKey, setHoveredKey] = useState(null);
   const audioRef = useRef(null);
 
-  useEffect(() => {
-    axios.get(ITUNES_URL).then((response) => {
-      const validTracks = response.data.results
-        .filter((result) => result.previewUrl)
-        .map((result) => ({
-          name: result.trackName,
-          artist: result.artistName,
-          image: result.artworkUrl100.replace("100x100", "300x300"),
-          preview: result.previewUrl,
-          id: result.artistId,
-        }));
-      setTracks(validTracks);
-    });
+  const loadArtists = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const results = await Promise.all(
+        CURATED_ARTISTS.map((name) =>
+          fetchArtistTracks(name).then((tracks) => ({ name, tracks }))
+        )
+      );
+      setArtistSections(results.filter((s) => s.tracks.length > 0));
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    if (!audioRef.current || tracks.length === 0) return;
+    loadArtists();
+  }, [loadArtists]);
 
-    audioRef.current.src = tracks[currentIndex].preview;
-
+  useEffect(() => {
+    if (!audioRef.current || !currentTrack) return;
+    audioRef.current.src = currentTrack.preview;
     if (isPlaying) {
       audioRef.current.play().catch(() => {});
     } else {
       audioRef.current.pause();
     }
-  }, [tracks, currentIndex, isPlaying]);
+  }, [currentTrack, isPlaying]);
 
-  function handleSongEnd() {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % tracks.length);
-  }
-
-  function handleCardClick(index) {
-    if (currentIndex === index) {
+  function handleCardClick(track, key) {
+    if (currentTrack?.preview === track.preview) {
       setIsPlaying((prev) => !prev);
     } else {
-      setCurrentIndex(index);
+      setCurrentTrack(track);
       setIsPlaying(true);
     }
+  }
+
+  function handleSongEnd() {
+    setIsPlaying(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="browse-artist browse-artist--loading">
+        <p>Loading artists…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="browse-artist browse-artist--error">
+        <p>Could not load tracks.</p>
+        <button className="retry-btn" onClick={loadArtists}>
+          Try Again
+        </button>
+      </div>
+    );
   }
 
   return (
     <div className="browse-artist">
       <audio ref={audioRef} onEnded={handleSongEnd} preload="auto" />
-      <div className="cards">
-        {tracks.map((track, index) => (
-          <div
-            className="card"
-            key={index}
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(-1)}
-            onClick={() => handleCardClick(index)}
-          >
-            {hoveredIndex === index && (
-              <div className="player">
-                <button onClick={() => setIsPlaying((prev) => !prev)}>
-                  {isPlaying && currentIndex === index ? "Pause" : "Play"}
-                </button>
-              </div>
-            )}
-            <img src={track.image} alt={`${track.artist} — ${track.name}`} />
-            <Link className="next-video" to={`/artist/${track.id}`}>
-              <Typography>{track.artist}</Typography>
-              <Typography>{track.name}</Typography>
-            </Link>
+      {artistSections.map(({ name, tracks }) => (
+        <div className="artist-section" key={name}>
+          <h3 className="artist-section__title">{name}</h3>
+          <div className="cards">
+            {tracks.map((track, i) => {
+              const key = `${name}-${i}`;
+              const isActive = currentTrack?.preview === track.preview;
+              return (
+                <div
+                  className={`card${isActive ? " card--active" : ""}`}
+                  key={key}
+                  onMouseEnter={() => setHoveredKey(key)}
+                  onMouseLeave={() => setHoveredKey(null)}
+                  onClick={() => handleCardClick(track, key)}
+                >
+                  {(hoveredKey === key || isActive) && (
+                    <div className="player">
+                      <button>
+                        {isActive && isPlaying ? "⏸" : "▶"}
+                      </button>
+                    </div>
+                  )}
+                  <img
+                    src={track.image}
+                    alt={`${track.artist} — ${track.name}`}
+                  />
+                  <Link
+                    className="card__info"
+                    to={`/artist/${track.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="card__artist">{track.artist}</span>
+                    <span className="card__track">{track.name}</span>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
