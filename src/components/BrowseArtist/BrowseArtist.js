@@ -1,66 +1,53 @@
 import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./BrowseArtist.scss";
 
+const ITUNES_URL =
+  "https://itunes.apple.com/search?term=hip-hop+rnb+afrobeats&media=music&entity=song&limit=24";
+
 function BrowseArtist() {
-  const [music, setMusic] = useState([]);
+  const [tracks, setTracks] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isHovering, setIsHovering] = useState(-1);
+  const [hoveredIndex, setHoveredIndex] = useState(-1);
+  const audioRef = useRef(null);
 
   useEffect(() => {
-    axios
-      .get(
-        "https://v1.nocodeapi.com/fyiah876/spotify/fHCqbcjtNZRlBCZl/playlists?id=5HlbFuuO9gZ3Y4coHUtsSO"
-      )
-      .then((response) => {
-        const tracks = response.data.tracks.items.map((item) => {
-          const track = item.track;
-          return {
-            name: track.name,
-            artist: track.artists[0].name, // assuming there is only one artist per track
-            image: track.album.images[0].url, // get the first image url of the album
-            preview: track.preview_url,
-            id: track.artists[0].id,
-          };
-        });
-        setMusic(tracks);
-      });
+    axios.get(ITUNES_URL).then((response) => {
+      const validTracks = response.data.results
+        .filter((result) => result.previewUrl)
+        .map((result) => ({
+          name: result.trackName,
+          artist: result.artistName,
+          image: result.artworkUrl100.replace("100x100", "300x300"),
+          preview: result.previewUrl,
+          id: result.artistId,
+        }));
+      setTracks(validTracks);
+    });
   }, []);
 
   useEffect(() => {
-    const audioPlayer = document.getElementById("audioPlayer");
-    if (audioPlayer && music.length > 0) {
-      audioPlayer.src = music[currentIndex].preview;
-      if (isPlaying) {
-        audioPlayer.play();
-      } else {
-        audioPlayer.pause();
-      }
+    if (!audioRef.current || tracks.length === 0) return;
+
+    audioRef.current.src = tracks[currentIndex].preview;
+
+    if (isPlaying) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
     }
-  }, [music, currentIndex, isPlaying]);
+  }, [tracks, currentIndex, isPlaying]);
 
   function handleSongEnd() {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % music.length);
-  }
-
-  function handlePlayerClick() {
-    setIsPlaying((prevIsPlaying) => !prevIsPlaying);
-  }
-
-  function handleMouseEnter(index) {
-    setIsHovering(index);
-  }
-
-  function handleMouseLeave() {
-    setIsHovering(-1);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % tracks.length);
   }
 
   function handleCardClick(index) {
     if (currentIndex === index) {
-      setIsPlaying((prevIsPlaying) => !prevIsPlaying);
+      setIsPlaying((prev) => !prev);
     } else {
       setCurrentIndex(index);
       setIsPlaying(true);
@@ -69,24 +56,24 @@ function BrowseArtist() {
 
   return (
     <div className="browse-artist">
-      <audio id="audioPlayer" onEnded={handleSongEnd} preload="auto"></audio>
+      <audio ref={audioRef} onEnded={handleSongEnd} preload="auto" />
       <div className="cards">
-        {music.map((track, index) => (
+        {tracks.map((track, index) => (
           <div
             className="card"
             key={index}
-            onMouseEnter={() => handleMouseEnter(index)}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(-1)}
             onClick={() => handleCardClick(index)}
           >
-            {isHovering === index && (
+            {hoveredIndex === index && (
               <div className="player">
-                <button onClick={handlePlayerClick}>
-                  {isPlaying ? "Pause" : "Play"}
+                <button onClick={() => setIsPlaying((prev) => !prev)}>
+                  {isPlaying && currentIndex === index ? "Pause" : "Play"}
                 </button>
               </div>
             )}
-            <img src={track.image} alt={`${track.artist} - ${track.name}`} />
+            <img src={track.image} alt={`${track.artist} — ${track.name}`} />
             <Link className="next-video" to={`/artist/${track.id}`}>
               <Typography>{track.artist}</Typography>
               <Typography>{track.name}</Typography>
