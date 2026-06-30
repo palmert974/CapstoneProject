@@ -1,34 +1,25 @@
-import "./Home.scss";
 import { Link } from "react-router-dom";
-import Typography from "@mui/material/Typography";
+import { Typography } from "@mui/material";
 import hero from "../assets/images/hero.jpg";
 import bottom from "../assets/images/bottom.jpg";
 import BrowseArtist from "../components/BrowseArtist/BrowseArtist";
 import Upload from "../components/Upload/Upload";
 import ArtistResource from "../components/ArtistResource/ArtistResource";
+import "./Home.scss";
 
 const Home = () => {
   return (
     <div className="home">
-      <img className="home__img-top" src={hero} alt="" />
+      <img className="home__img-top" src={hero} alt="DiscoverUs hero banner" />
       <div className="home__hero">
-        <Typography
-          variant="h4"
-          sx={{ fontFamily: "Arial", color: "white", mb: 2 }}
-        >
-          Unleash Music's Hidden Gems with DiscoverUs
-        </Typography>
-        <Typography variant="h7" component="p">
-          <div
-            className="button-wrapper"
-            style={{ display: "flex", gap: "52px", flexDirection: "row" }}
-          ></div>
+        <Typography variant="h4" sx={{ fontFamily: "Arial", color: "white", mb: 2 }}>
+          Unleash Music&apos;s Hidden Gems with DiscoverUs
         </Typography>
       </div>
       <div className="home__artist">
         <Upload />
         <Link to="/signup">
-          <button className="home__button">Sign Up Today </button>
+          <button className="home__button">Sign Up Today</button>
         </Link>
         <Link to="/browse">
           <button className="home__button">Listen</button>
@@ -36,11 +27,8 @@ const Home = () => {
         <BrowseArtist />
       </div>
       <div className="home__closing">
-        <Typography
-          variant="h5"
-          sx={{ fontFamily: "Arial", color: "white", mb: 1, margin: "10px" }}
-        >
-          Thanks for listening. Now Sign Up. Scout for emerging artist,
+        <Typography variant="h5" sx={{ fontFamily: "Arial", color: "white", mb: 1, margin: "10px" }}>
+          Thanks for listening. Now Sign Up. Scout for emerging artists,
           collaborate and build your playlists. All for free.
         </Typography>
         <Link to="/browse">
@@ -48,7 +36,7 @@ const Home = () => {
         </Link>
       </div>
       <ArtistResource />
-      <img className="home__img-bottom" src={bottom} alt="producers" />
+      <img className="home__img-bottom" src={bottom} alt="music producers" />
     </div>
   );
 };
