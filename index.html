@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DiscoverUs — Find Your Next Favorite Artist</title>
+  <meta name="description" content="DiscoverUs is an artist discovery platform for independent and emerging musicians. Browse by genre, play previews, and find your next favorite artist." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-icon">◈</span> DiscoverUs
+      </a>
+      <div class="nav__links">
+        <a href="index.html" class="nav__link nav__link--active">Home</a>
+        <a href="browse.html" class="nav__link">Browse</a>
+        <a href="browse.html" class="btn btn--sm">Explore Music</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__bg">
+      <div class="hero__orb hero__orb--1"></div>
+      <div class="hero__orb hero__orb--2"></div>
+      <div class="hero__orb hero__orb--3"></div>
+    </div>
+    <div class="container">
+      <div class="hero__content">
+        <div class="hero__eyebrow">
+          <span class="pulse-dot"></span> 15,000+ artists discovered this month
+        </div>
+        <h1 class="hero__title">
+          Unleash Music's<br />
+          <span class="gradient-text">Hidden Gems</span>
+        </h1>
+        <p class="hero__sub">
+          The platform where independent artists get found. Browse emerging talent across every genre — play 30-second previews and discover your next obsession.
+        </p>
+        <div class="hero__actions">
+          <a href="browse.html" class="btn btn--primary btn--lg">Start Discovering</a>
+          <button class="btn btn--ghost btn--lg" onclick="scrollToGenres()">Browse Genres ↓</button>
+        </div>
+        <div class="hero__stats">
+          <div class="stat"><span class="stat__num">50K+</span><span class="stat__label">Tracks</span></div>
+          <div class="stat__divider"></div>
+          <div class="stat"><span class="stat__num">Free</span><span class="stat__label">No Login</span></div>
+          <div class="stat__divider"></div>
+          <div class="stat"><span class="stat__num">30s</span><span class="stat__label">Previews</span></div>
+        </div>
+      </div>
+      <!-- Featured track player -->
+      <div class="hero__player" id="heroPlayer">
+        <div class="player-card">
+          <div class="player-card__glow"></div>
+          <div class="player-card__art" id="heroArt">
+            <div class="player-card__art-placeholder">♪</div>
+          </div>
+          <div class="player-card__info">
+            <div class="player-card__label">Now Playing</div>
+            <div class="player-card__title" id="heroTrackName">Loading...</div>
+            <div class="player-card__artist" id="heroArtistName">—</div>
+          </div>
+          <div class="player-card__controls">
+            <button class="play-btn" id="heroPlayBtn" onclick="toggleHeroPlay()">
+              <span id="heroPlayIcon">▶</span>
+            </button>
+          </div>
+          <div class="player-card__bar">
+            <div class="player-card__progress" id="heroProgress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Genre Browsing -->
+  <section class="genres" id="genres">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Browse by Sound</p>
+        <h2 class="section-title">Find Your Genre</h2>
+      </div>
+      <div class="genres__grid">
+        <button class="genre-card genre-card--hip-hop" onclick="goToBrowse('hip hop')">
+          <div class="genre-card__icon">🎤</div>
+          <div class="genre-card__name">Hip-Hop</div>
+          <div class="genre-card__count">R&B · Rap · Trap</div>
+        </button>
+        <button class="genre-card genre-card--rnb" onclick="goToBrowse('r&b soul')">
+          <div class="genre-card__icon">🎵</div>
+          <div class="genre-card__name">R&B / Soul</div>
+          <div class="genre-card__count">Soul · Neo-Soul</div>
+        </button>
+        <button class="genre-card genre-card--afro" onclick="goToBrowse('afrobeats')">
+          <div class="genre-card__icon">🌍</div>
+          <div class="genre-card__name">Afrobeats</div>
+          <div class="genre-card__count">Afropop · Amapiano</div>
+        </button>
+        <button class="genre-card genre-card--pop" onclick="goToBrowse('pop')">
+          <div class="genre-card__icon">✨</div>
+          <div class="genre-card__name">Pop</div>
+          <div class="genre-card__count">Indie · Alt-Pop</div>
+        </button>
+        <button class="genre-card genre-card--reggae" onclick="goToBrowse('reggae dancehall')">
+          <div class="genre-card__icon">🌴</div>
+          <div class="genre-card__name">Reggae</div>
+          <div class="genre-card__count">Dancehall · Soca</div>
+        </button>
+        <button class="genre-card genre-card--electronic" onclick="goToBrowse('electronic dance')">
+          <div class="genre-card__icon">⚡</div>
+          <div class="genre-card__name">Electronic</div>
+          <div class="genre-card__count">House · Techno · EDM</div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trending Now -->
+  <section class="trending">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Trending Now</p>
+        <h2 class="section-title">Hot This Week</h2>
+        <a href="browse.html" class="section-link">See All →</a>
+      </div>
+      <div class="tracks-grid" id="trendingGrid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Artist Spotlight -->
+  <section class="spotlight">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Artist Spotlight</p>
+        <h2 class="section-title">On the Rise</h2>
+      </div>
+      <div class="spotlight__grid" id="spotlightGrid">
+        <div class="skeleton-artist"></div>
+        <div class="skeleton-artist"></div>
+        <div class="skeleton-artist"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="cta-banner">
+    <div class="container">
+      <div class="cta-banner__inner">
+        <div class="cta-banner__orb"></div>
+        <div class="cta-banner__text">
+          <h2>Ready to Dive In?</h2>
+          <p>Thousands of tracks, zero barriers. No login, no subscription, just music.</p>
+        </div>
+        <a href="browse.html" class="btn btn--primary btn--lg">Browse All Music</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <span class="nav__logo-icon">◈</span> DiscoverUs
+          <p class="footer__tagline">Connecting artists with listeners worldwide.</p>
+        </div>
+        <div class="footer__links">
+          <a href="index.html">Home</a>
+          <a href="browse.html">Browse</a>
+          <a href="https://github.com/palmert974/CapstoneProject" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+        <div class="footer__copy">© 2025 DiscoverUs · Built by Tamara Palmer</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Audio element -->
+  <audio id="globalAudio" preload="none"></audio>
+
+  <!-- Mini Player (sticky) -->
+  <div class="mini-player" id="miniPlayer" style="display:none;">
+    <div class="mini-player__art" id="miniArt">♪</div>
+    <div class="mini-player__info">
+      <div class="mini-player__track" id="miniTrackName">—</div>
+      <div class="mini-player__artist" id="miniArtistName">—</div>
+    </div>
+    <button class="mini-player__btn" id="miniPlayBtn" onclick="toggleMiniPlay()">▶</button>
+    <button class="mini-player__close" onclick="closeMiniPlayer()">✕</button>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    function scrollToGenres() {
+      document.getElementById('genres').scrollIntoView({ behavior: 'smooth' });
+    }
+    function goToBrowse(genre) {
+      window.location.href = 'browse.html?genre=' + encodeURIComponent(genre);
+    }
+  </script>
+</body>
+</html>

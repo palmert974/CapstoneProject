@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Music — DiscoverUs</title>
+  <meta name="description" content="Browse and discover emerging artists and music across all genres on DiscoverUs." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-icon">◈</span> DiscoverUs
+      </a>
+      <div class="nav__links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="browse.html" class="nav__link nav__link--active">Browse</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Browse Header -->
+  <section class="browse-hero">
+    <div class="container">
+      <h1 class="browse-hero__title">Browse Music</h1>
+      <p class="browse-hero__sub">Explore tracks across every genre. Click any card to play a 30-second preview.</p>
+
+      <!-- Search Bar -->
+      <div class="search-wrap">
+        <span class="search-wrap__icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="Search artists, songs, albums..."
+          oninput="handleSearch(this.value)"
+          onkeydown="if(event.key==='Enter') triggerSearch()"
+        />
+        <button class="btn btn--primary" onclick="triggerSearch()">Search</button>
+      </div>
+
+      <!-- Genre Filter Pills -->
+      <div class="genre-pills" id="genrePills">
+        <button class="pill pill--active" data-genre="" onclick="filterGenre(this, '')">All</button>
+        <button class="pill" data-genre="hip hop" onclick="filterGenre(this, 'hip hop')">Hip-Hop</button>
+        <button class="pill" data-genre="r&b soul" onclick="filterGenre(this, 'r&b soul')">R&B / Soul</button>
+        <button class="pill" data-genre="afrobeats" onclick="filterGenre(this, 'afrobeats')">Afrobeats</button>
+        <button class="pill" data-genre="pop" onclick="filterGenre(this, 'pop')">Pop</button>
+        <button class="pill" data-genre="reggae dancehall" onclick="filterGenre(this, 'reggae dancehall')">Reggae</button>
+        <button class="pill" data-genre="electronic dance" onclick="filterGenre(this, 'electronic dance')">Electronic</button>
+        <button class="pill" data-genre="jazz" onclick="filterGenre(this, 'jazz')">Jazz</button>
+        <button class="pill" data-genre="latin" onclick="filterGenre(this, 'latin')">Latin</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section class="results">
+    <div class="container">
+      <div class="results__header">
+        <span class="results__count" id="resultsCount">Loading...</span>
+        <div class="results__sort">
+          <select class="sort-select" id="sortSelect" onchange="sortTracks(this.value)">
+            <option value="default">Sort: Relevance</option>
+            <option value="artist">Sort: Artist A–Z</option>
+            <option value="track">Sort: Track A–Z</option>
+          </select>
+        </div>
+      </div>
+      <div class="tracks-grid tracks-grid--browse" id="browseGrid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+      <div class="load-more-wrap">
+        <button class="btn btn--outline" id="loadMoreBtn" onclick="loadMore()" style="display:none;">Load More</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <span class="nav__logo-icon">◈</span> DiscoverUs
+          <p class="footer__tagline">Connecting artists with listeners worldwide.</p>
+        </div>
+        <div class="footer__links">
+          <a href="index.html">Home</a>
+          <a href="browse.html">Browse</a>
+          <a href="https://github.com/palmert974/CapstoneProject" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+        <div class="footer__copy">© 2025 DiscoverUs · Built by Tamara Palmer</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Audio -->
+  <audio id="globalAudio" preload="none"></audio>
+
+  <!-- Mini Player -->
+  <div class="mini-player" id="miniPlayer" style="display:none;">
+    <div class="mini-player__art" id="miniArt">♪</div>
+    <div class="mini-player__info">
+      <div class="mini-player__track" id="miniTrackName">—</div>
+      <div class="mini-player__artist" id="miniArtistName">—</div>
+    </div>
+    <button class="mini-player__btn" id="miniPlayBtn" onclick="toggleMiniPlay()">▶</button>
+    <button class="mini-player__close" onclick="closeMiniPlayer()">✕</button>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // On load, check URL params for genre
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const genre = params.get('genre') || '';
+      if (genre) {
+        const pill = document.querySelector(`[data-genre="${genre}"]`);
+        if (pill) filterGenre(pill, genre);
+        else initBrowse(genre);
+      } else {
+        initBrowse('');
+      }
+    });
+  </script>
+</body>
+</html>
