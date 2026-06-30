@@ -53,21 +53,46 @@
 
 
   .card {
-    width: 300px;
+    width: 200px;
     border-radius: 10px;
     overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: #1a1a1a;
 
     &:hover {
       transform: scale(1.05);
     }
 
+    .player {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+
+      button {
+        background: #1db954;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        font-weight: bold;
+      }
+    }
+
     img {
-      width: 23%;
-      object-fit: contain;
-      max-width: 300px;
-      /* Set a max width for the image to fit within the container */
-      max-height: 300px;
-      /* Set a max height for the image to fit within the container */
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
     }
 
     h2 {

@@ -3,54 +3,112 @@
 @import "../../styles/typography";
 
 .artist-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient($spotify-dark-gray, #121212 100%);
+  padding: 2rem 1rem;
+  min-height: 100vh;
+
+  &__hero-img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  &__loading {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    background-color: $spotify-green;
-    background: linear-gradient($spotify-green, $spotify-dark-gray 100%);
+    justify-content: center;
+    min-height: 60vh;
+    color: white;
+    font-size: 1.2rem;
+    gap: 0.5rem;
+
+    a {
+      color: $spotify-green;
+    }
+  }
+
+  &__back {
+    margin-top: 2rem;
+    color: $spotify-green;
+    text-decoration: none;
+    font-size: 0.95rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding-top: 1rem;
+  width: 100%;
+  max-width: 900px;
+
+  .card {
+    width: 160px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: #1a1a1a;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    .player {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+
+      button {
+        background: $spotify-green;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: bold;
+      }
+    }
 
     img {
-        width: 100%;
-        object-fit: cover;
-        margin-bottom: 1rem;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
     }
 
-    h2 {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-        color: $spotify-white;
+    &__info {
+      padding: 0.5rem 0.6rem 0.75rem;
     }
 
-    h3 {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-        color: $spotify-light-gray;
+    &__title {
+      margin: 0;
+      font-size: 0.8rem;
+      color: $spotify-white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-
-    p {
-        margin-bottom: 1rem;
-    }
-
-    ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-
-        li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-
-            img {
-                width: 50px;
-                height: 50px;
-                object-fit: cover;
-                margin-right: 0.5rem;
-            }
-
-            p {
-                margin: 0;
-            }
-        }
-    }
+  }
 }

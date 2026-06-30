@@ -1,189 +1,138 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
 import { Typography } from "@mui/material";
-import { Link } from "react-router-dom";
-import "./ArtistProfile.scss";
 import axios from "axios";
+import "./ArtistProfile.scss";
 
 function ArtistProfile() {
   const { idFromParams } = useParams();
-  const [artist, setArtist] = useState(null);
-  const [music, setMusic] = useState([]);
+  const [tracks, setTracks] = useState([]);
+  const [artistName, setArtistName] = useState("");
+  const [artistImage, setArtistImage] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovering, setIsHovering] = useState(-1);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await axios(
-        `https://v1.nocodeapi.com/fyiah876/spotify/fHCqbcjtNZRlBCZl/artists?id=${idFromParams}`
-      );
-      setArtist(result.data);
-    };
-    fetchData();
-  }, [idFromParams]);
+  const [loading, setLoading] = useState(true);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     axios
       .get(
-        "https://v1.nocodeapi.com/fyiah876/spotify/fHCqbcjtNZRlBCZl/playlists?id=5HlbFuuO9gZ3Y4coHUtsSO?si=7dbcfaa9160c4816"
+        `https://itunes.apple.com/search?artistId=${idFromParams}&media=music&entity=song&limit=12`
       )
       .then((response) => {
-        const tracks = response.data.tracks.items
-          .filter((item) => item.track.artists[0].name === artist.name)
-          .map((item) => {
-            const track = item.track;
-            return {
-              name: track.name,
-              artist: track.artists[0].name, // assuming there is only one artist per track
-              image: track.album.images[0].url, // get the first image url of the album
-              preview: track.preview_url,
-              id: track.artists[0].id,
-            };
-          });
-        setMusic(tracks);
-      });
-  }, [artist]);
+        const results = response.data.results.filter((r) => r.previewUrl);
+        if (results.length > 0) {
+          setArtistName(results[0].artistName);
+          setArtistImage(
+            results[0].artworkUrl100.replace("100x100", "300x300")
+          );
+          setTracks(
+            results.map((r) => ({
+              name: r.trackName,
+              artist: r.artistName,
+              image: r.artworkUrl100.replace("100x100", "300x300"),
+              preview: r.previewUrl,
+              id: r.artistId,
+            }))
+          );
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [idFromParams]);
 
   useEffect(() => {
-    const audioPlayer = document.getElementById("audioPlayer");
-    if (audioPlayer && music.length > 0) {
-      audioPlayer.src = music[currentIndex].preview;
-      if (isPlaying) {
-        audioPlayer.play();
-      } else {
-        audioPlayer.pause();
-      }
+    if (!audioRef.current || tracks.length === 0) return;
+    audioRef.current.src = tracks[currentIndex].preview;
+    if (isPlaying) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
     }
-  }, [music, currentIndex, isPlaying]);
+  }, [tracks, currentIndex, isPlaying]);
 
   function handleSongEnd() {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % music.length);
-  }
-
-  function handlePlayerClick() {
-    setIsPlaying((prevIsPlaying) => !prevIsPlaying);
-  }
-
-  function handleMouseEnter(index) {
-    setIsHovering(index);
-  }
-
-  function handleMouseLeave() {
-    setIsHovering(-1);
+    setCurrentIndex((prev) => (prev + 1) % tracks.length);
   }
 
   function handleCardClick(index) {
     if (currentIndex === index) {
-      setIsPlaying((prevIsPlaying) => !prevIsPlaying);
+      setIsPlaying((prev) => !prev);
     } else {
       setCurrentIndex(index);
       setIsPlaying(true);
     }
   }
 
-  if (!artist) {
-    return <div>Loading...</div>;
-  }
+  if (loading)
+    return <div className="artist-profile__loading">Loading artist...</div>;
+
+  if (tracks.length === 0)
+    return (
+      <div className="artist-profile__loading">
+        No tracks found for this artist.{" "}
+        <Link to="/browse">Back to Browse</Link>
+      </div>
+    );
 
   return (
     <div className="artist-profile">
-      <img src={artist.images[0].url} alt={artist.name} />
+      {artistImage && (
+        <img
+          className="artist-profile__hero-img"
+          src={artistImage}
+          alt={artistName}
+        />
+      )}
       <Typography
         component="h1"
-        variant="subtitle4"
         sx={{
           fontWeight: "bold",
-          color: "White",
+          color: "white",
           fontFamily: "Arial",
-          mb: 2,
+          mb: 1,
+          fontSize: "2rem",
         }}
       >
-        {artist.name}
+        {artistName}
       </Typography>
       <Typography
         component="p"
-        variant="subtitle6"
-        sx={{
-          color: "White",
-          fontFamily: "Arial",
-          mb: 2,
-        }}
+        sx={{ color: "rgba(255,255,255,0.6)", fontFamily: "Arial", mb: 3 }}
       >
-        Monthly Listeners: {artist.followers.total}
+        {tracks.length} tracks available
       </Typography>
-      <Typography
-        component="p"
-        variant="subtitle6"
-        sx={{
-          color: "White",
-          fontFamily: "Arial",
-          mb: 2,
-        }}
-      >
-        Streams: {artist.popularity}
-      </Typography>
-      <Typography
-        component="h2"
-        variant="subtitle6"
-        sx={{
-          fontWeight: "bold",
-          color: "White",
-          fontFamily: "Arial",
-          mb: 2,
-        }}
-      >
-        {music.length} Songs
-      </Typography>
-      <div className="browse-artist">
-        <audio id="audioPlayer" onEnded={handleSongEnd} preload="auto"></audio>
-        <div className="cards">
-          {music.map((track, index) => (
-            <div
-              className="card"
-              key={index}
-              onMouseEnter={() => handleMouseEnter(index)}
-              onMouseLeave={handleMouseLeave}
-              onClick={() => handleCardClick(index)}
-            >
-              {isHovering === index && (
-                <div className="player">
-                  <button onClick={handlePlayerClick}>
-                    {isPlaying ? "Pause" : "Play"}
-                  </button>
-                </div>
-              )}
-              <img src={track.image} alt={`${track.artist} - ${track.name}`} />
-              <Link className="next-video" to={`/artist/${track.id}`}>
-                <Typography
-                  component="h4"
-                  variant="subtitle6"
-                  sx={{
-                    fontWeight: "bold",
-                    color: "White",
-                    fontFamily: "Arial",
-                    mb: 2,
-                  }}
-                >
-                  {track.artist}
-                </Typography>
-                <Typography
-                  component="p"
-                  variant="subtitle6"
-                  sx={{
-                    color: "White",
-                    fontFamily: "Arial",
-                    mb: 2,
-                  }}
-                >
-                  {track.name}
-                </Typography>
-              </Link>
+
+      <audio ref={audioRef} onEnded={handleSongEnd} preload="auto" />
+
+      <div className="cards">
+        {tracks.map((track, index) => (
+          <div
+            className="card"
+            key={index}
+            onMouseEnter={() => setIsHovering(index)}
+            onMouseLeave={() => setIsHovering(-1)}
+            onClick={() => handleCardClick(index)}
+          >
+            {isHovering === index && (
+              <div className="player">
+                <button onClick={() => handleCardClick(index)}>
+                  {isPlaying && currentIndex === index ? "⏸" : "▶"}
+                </button>
+              </div>
+            )}
+            <img src={track.image} alt={`${track.artist} — ${track.name}`} />
+            <div className="card__info">
+              <p className="card__title">{track.name}</p>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-      {/* Add contact info here */}
+
+      <Link to="/browse" className="artist-profile__back">
+        ← Back to Browse
+      </Link>
     </div>
   );
 }
