@@ -16,9 +16,12 @@ function ArtistProfile() {
   const audioRef = useRef(null);
 
   useEffect(() => {
+    // Proxied through our own /api/tracks (see api/tracks.js) instead of
+    // calling itunes.apple.com directly from the browser, which was
+    // intermittently blocked by inconsistent CORS headers from Apple's CDN.
     axios
       .get(
-        `https://itunes.apple.com/search?artistId=${idFromParams}&media=music&entity=song&limit=12`
+        `/api/tracks?artistId=${idFromParams}&media=music&entity=song&limit=12`
       )
       .then((response) => {
         const results = response.data.results.filter((r) => r.previewUrl);

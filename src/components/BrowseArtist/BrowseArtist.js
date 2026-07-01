@@ -18,7 +18,10 @@ const _artistCache = new Map();
 
 async function fetchArtistTracks(artist) {
   if (_artistCache.has(artist)) return _artistCache.get(artist);
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
+  // Proxied through our own /api/tracks (see api/tracks.js) instead of
+  // calling itunes.apple.com directly from the browser, which was
+  // intermittently blocked by inconsistent CORS headers from Apple's CDN.
+  const url = `/api/tracks?term=${encodeURIComponent(
     artist
   )}&media=music&entity=song&limit=6&country=US`;
   const res = await axios.get(url);
