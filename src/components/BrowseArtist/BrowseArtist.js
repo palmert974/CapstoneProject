@@ -12,12 +12,17 @@ const CURATED_ARTISTS = [
   "J. Cole",
 ];
 
+// Home and Browse both mount this component, so cache results across mounts
+// to avoid doubling up on iTunes' undocumented per-IP rate limit.
+const _artistCache = new Map();
+
 async function fetchArtistTracks(artist) {
+  if (_artistCache.has(artist)) return _artistCache.get(artist);
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
     artist
   )}&media=music&entity=song&limit=6&country=US`;
   const res = await axios.get(url);
-  return res.data.results
+  const tracks = res.data.results
     .filter((r) => r.previewUrl && r.artworkUrl100)
     .slice(0, 4)
     .map((r) => ({
@@ -27,6 +32,8 @@ async function fetchArtistTracks(artist) {
       preview: r.previewUrl,
       id: r.artistId,
     }));
+  _artistCache.set(artist, tracks);
+  return tracks;
 }
 
 function BrowseArtist() {
@@ -41,18 +48,23 @@ function BrowseArtist() {
   const loadArtists = useCallback(async () => {
     setLoading(true);
     setError(false);
-    try {
-      const results = await Promise.all(
-        CURATED_ARTISTS.map((name) =>
-          fetchArtistTracks(name).then((tracks) => ({ name, tracks }))
-        )
-      );
-      setArtistSections(results.filter((s) => s.tracks.length > 0));
-    } catch {
+    const outcomes = await Promise.allSettled(
+      CURATED_ARTISTS.map((name) =>
+        fetchArtistTracks(name).then((tracks) => ({ name, tracks }))
+      )
+    );
+    const sections = outcomes
+      .filter((o) => o.status === "fulfilled")
+      .map((o) => o.value)
+      .filter((s) => s.tracks.length > 0);
+    // Only show the error state if every artist failed to load —
+    // one flaky/rate-limited request shouldn't blank the whole section.
+    if (sections.length === 0 && outcomes.length > 0) {
       setError(true);
-    } finally {
-      setLoading(false);
+    } else {
+      setArtistSections(sections);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
